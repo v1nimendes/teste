@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+
+files/
+data/
+*.duckdb
+
+target/
+dbt_packages/
+logs/
+
+.vscode/
+.idea/
+.DS_Store
+
+.user.yml

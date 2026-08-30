@@ -1,0 +1,5 @@
+dbt-core==1.12.3
+dbt-duckdb==1.11.0
+duckdb==1.5.5
+prefect==3.8.4
+requests==2.34.2
