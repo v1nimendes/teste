@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: receita_federal
+    description: Tabelas brutas carregadas pelo Prefect a partir dos arquivos abertos do CNPJ.
+    schema: raw
+    tables:
+      - name: empresas
+        description: Dados cadastrais da empresa, no grao de CNPJ basico.
+      - name: estabelecimentos
+        description: Unidades da empresa, no grao de CNPJ completo.
+      - name: socios
+        description: Quadro societario de cada empresa.
+      - name: simples
+        description: Adesao ao Simples Nacional e ao MEI.
+      - name: cnaes
+        description: Tabela de dominio das subclasses CNAE.
+      - name: naturezas
+        description: Tabela de dominio das naturezas juridicas.
+      - name: receitaws
+        description: Enriquecimento opcional obtido na API publica da ReceitaWS.

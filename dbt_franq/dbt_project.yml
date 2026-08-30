@@ -1,0 +1,29 @@
+name: franq
+version: 1.0.0
+config-version: 2
+profile: franq
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  situacao_ativa: "02"
+
+models:
+  franq:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: ephemeral
+    marts:
+      +schema: marts
+      +materialized: table
+
+snapshots:
+  franq:
+    +schema: snapshots

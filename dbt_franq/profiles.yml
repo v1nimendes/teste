@@ -1,0 +1,8 @@
+franq:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/franq.duckdb
+      schema: main
+      threads: 4
