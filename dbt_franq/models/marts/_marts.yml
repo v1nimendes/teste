@@ -1,0 +1,82 @@
+version: 2
+
+models:
+  - name: dim_cnae
+    description: Dimensao de atividade economica com a hierarquia secao, divisao, grupo, classe e subclasse.
+    columns:
+      - name: cod_cnae
+        description: Subclasse CNAE de sete digitos, chave primaria da dimensao.
+        tests:
+          - unique
+          - not_null
+      - name: cod_secao
+        description: Letra da secao CNAE derivada da divisao.
+        tests:
+          - not_null
+
+  - name: dim_natureza_juridica
+    description: Dimensao de natureza juridica com a categoria e a regra de exigencia de socios.
+    columns:
+      - name: cod_natureza_juridica
+        description: Codigo da natureza juridica, chave primaria da dimensao.
+        tests:
+          - unique
+          - not_null
+      - name: exige_socios
+        description: Indica se a natureza juridica pressupoe quadro societario.
+        tests:
+          - not_null
+
+  - name: dim_empresa
+    description: Dimensao de empresa com os dados cadastrais e o enriquecimento da ReceitaWS.
+    columns:
+      - name: cnpj_basico
+        description: Chave primaria da empresa.
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_empresas_ativas
+    description: Fato no grao de empresa com ao menos um estabelecimento ativo, carga incremental.
+    columns:
+      - name: cnpj_basico
+        description: Chave primaria do fato.
+        tests:
+          - unique
+          - not_null
+      - name: cod_cnae_principal
+        description: CNAE principal da matriz.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_cnae')
+                field: cod_cnae
+      - name: cod_natureza_juridica
+        description: Natureza juridica da empresa.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_natureza_juridica')
+                field: cod_natureza_juridica
+      - name: qtd_estabelecimentos_ativos
+        description: Quantidade de estabelecimentos com situacao cadastral ativa.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                inclusive: true
+      - name: qtd_socios
+        description: Quantidade de socios no quadro societario.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                inclusive: true
+      - name: uf
+        description: Unidade federativa da matriz.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA",
+                         "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN",
+                         "RO", "RR", "RS", "SC", "SE", "SP", "TO", "EX"]

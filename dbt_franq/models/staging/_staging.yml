@@ -1,0 +1,119 @@
+version: 2
+
+models:
+  - name: stg_empresas
+    description: Empresas padronizadas no grao de CNPJ basico, sem duplicidades.
+    columns:
+      - name: cnpj_basico
+        description: Oito primeiros digitos do CNPJ, chave primaria da empresa.
+        tests:
+          - unique
+          - not_null
+      - name: capital_social
+        description: Capital social convertido de texto brasileiro para decimal.
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: cod_porte
+        description: Codigo do porte declarado na Receita Federal.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["00", "01", "03", "05"]
+
+  - name: stg_estabelecimentos
+    description: Estabelecimentos padronizados no grao de CNPJ completo, carga incremental.
+    columns:
+      - name: cnpj
+        description: CNPJ de quatorze digitos, chave primaria do estabelecimento.
+        tests:
+          - unique
+          - not_null
+      - name: cnpj_basico
+        description: Chave estrangeira para a empresa.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_empresas')
+                field: cnpj_basico
+      - name: cod_matriz_filial
+        description: Indica se o estabelecimento e matriz ou filial.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["1", "2"]
+      - name: cod_situacao_cadastral
+        description: Situacao cadastral do estabelecimento na Receita Federal.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["01", "02", "03", "04", "08"]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - cnpj_basico
+              - cnpj_ordem
+
+  - name: stg_socios
+    description: Quadro societario padronizado, sem repeticao de socio na mesma empresa.
+    columns:
+      - name: cnpj_basico
+        description: Chave estrangeira para a empresa.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_empresas')
+                field: cnpj_basico
+      - name: documento_socio
+        description: CPF mascarado ou CNPJ do socio.
+      - name: nome_socio
+        description: Nome do socio ou razao social do socio pessoa juridica.
+      - name: cod_tipo_socio
+        description: Natureza do socio.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["1", "2", "3"]
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "nome_socio is not null or documento_socio is not null"
+
+  - name: stg_simples
+    description: Adesao ao Simples Nacional e ao MEI no grao de CNPJ basico.
+    columns:
+      - name: cnpj_basico
+        description: Chave primaria da adesao.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_cnaes
+    description: Dominio das subclasses CNAE.
+    columns:
+      - name: cod_cnae
+        description: Codigo da subclasse com sete digitos.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_naturezas
+    description: Dominio das naturezas juridicas.
+    columns:
+      - name: cod_natureza_juridica
+        description: Codigo da natureza juridica com quatro digitos.
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_receitaws
+    description: Enriquecimento opcional vindo da API publica da ReceitaWS.
+    columns:
+      - name: cnpj_basico
+        description: Chave primaria do enriquecimento.
+        tests:
+          - unique
